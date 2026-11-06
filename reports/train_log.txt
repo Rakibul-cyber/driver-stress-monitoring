@@ -1,0 +1,36 @@
+Clean dataset: 184276 rows, 15 subjects
+label
+no_stress    143330
+stress        40946
+Train: 37147 rows (stride 4), 12 subjects | Test: 35707 rows, subjects [15, 16, 17]
+  LOSO subject  2: acc=0.824 f1=0.392
+  LOSO subject  3: acc=0.917 f1=0.764
+  LOSO subject  4: acc=0.916 f1=0.752
+  LOSO subject  5: acc=0.794 f1=0.000
+  LOSO subject  6: acc=0.887 f1=0.659
+  LOSO subject  7: acc=0.977 f1=0.942
+  LOSO subject  8: acc=0.926 f1=0.812
+  LOSO subject  9: acc=0.795 f1=0.521
+  LOSO subject 10: acc=0.364 f1=0.421
+  LOSO subject 11: acc=0.890 f1=0.805
+  LOSO subject 13: acc=0.774 f1=0.591
+  LOSO subject 14: acc=0.895 f1=0.808
+
+LOSO CV (12 training subjects), mean ± std:
+  accuracy   0.830 ± 0.153
+  precision  0.690 ± 0.310
+  recall     0.655 ± 0.297
+  f1         0.622 ± 0.248
+  macro_f1   0.745 ± 0.177
+  roc_auc    0.897 ± 0.114
+
+Held-out test (subjects [15, 16, 17], 35707 windows):
+  accuracy         0.8811
+  precision        0.7452
+  recall           0.7692
+  f1               0.757
+  macro_f1         0.8392
+  confusion_matrix [[24850, 2261], [1984, 6612]]
+  roc_auc          0.9396
+
+Saved /Users/rakibulhassan/driver-stress-monitoring/models/stress_rf.joblib and /Users/rakibulhassan/driver-stress-monitoring/models/model_metadata.json in 31s

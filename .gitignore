@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Data (download with `python -m src.download_data`; WESAD terms: non-commercial use with attribution)
+data/raw/
+data/processed/
+*.part
+
+# Generated model binary (recreate with `python -m src.train`); metadata/metrics JSON is kept
+models/*.joblib
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+.env
