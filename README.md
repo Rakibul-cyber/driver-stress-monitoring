@@ -1,5 +1,7 @@
 # Real-Time Driver Stress & Cognitive Load Monitoring
 
+[![CI](https://github.com/Rakibul-cyber/driver-stress-monitoring/actions/workflows/ci.yml/badge.svg)](https://github.com/Rakibul-cyber/driver-stress-monitoring/actions/workflows/ci.yml)
+
 An end-to-end machine learning MVP that classifies **physiological stress vs. no stress** from heart-rate-variability (HRV) features and serves predictions through a **FastAPI** service and a **Streamlit** monitoring dashboard, with **simulated real-time** replay of held-out recordings. Everything runs in Docker.
 
 > **Scope note.** The dashboard *replays recorded* WESAD data from subjects the model never saw during training. It simulates a streaming pipeline and is **not** connected to live vehicle sensors. WESAD was recorded in a lab (stress induced with the Trier Social Stress Test), not while people were driving.
@@ -85,6 +87,11 @@ Performance varies widely between people. For example, S7 reaches F1 0.94, while
 
 **Inference latency:** roughly 5–10 ms per single-window prediction in-process on an Apple-silicon Mac (measured by the replay CLI), slightly higher through the API.
 
+**Reproducibility.** Training uses a fixed seed and pinned library versions.
+
+- **Same platform:** a fresh clone reproduces the exact numbers above on macOS (arm64, Python 3.13).
+- **Linux / Python 3.12 (Docker and CI):** the same code gives metrics within about 0.005 of the numbers above. For example, held-out accuracy is 0.883 and F1 0.762, caused by platform-specific floating-point differences in the Random Forest.
+
 ## Quick start (local)
 
 Requires Python 3.11+ (developed with 3.13; the Docker image uses 3.12).
@@ -150,6 +157,19 @@ docker compose down
 
 Compose is used only because two processes (API and dashboard) run from the same image.
 
+## Continuous integration
+
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push to `main`, on pull requests and on manual dispatch, using Ubuntu and Python 3.12. It:
+
+1. installs the pinned requirements;
+2. downloads the dataset (cached between runs);
+3. trains and evaluates the model;
+4. runs `pytest`;
+5. builds the Docker image;
+6. smoke-tests the API container (`/health`, `/model-info`, `/predict`).
+
+The dataset is downloaded at CI time and is never stored in the repository.
+
 ## Project structure
 
 ```
@@ -165,6 +185,7 @@ Compose is used only because two processes (API and dashboard) run from the same
 ├── data/                    raw/ and processed/ (generated, git-ignored)
 ├── reports/train_log.txt    training run output
 ├── docs/                    screenshots
+├── .github/workflows/ci.yml train → test → Docker build → API smoke test
 ├── Dockerfile, docker-compose.yml, requirements.txt
 ```
 
@@ -181,4 +202,4 @@ Compose is used only because two processes (API and dashboard) run from the same
 
 ## Possible next steps
 
-Subject-baseline normalisation · a raw-signal (ECG/EDA) feature pipeline on the original WESAD files · temporal smoothing of predictions · gradient-boosting comparison and threshold tuning · validation on driving datasets (e.g. the PhysioNet *Stress Recognition in Automobile Drivers* database) · CI workflow.
+Subject-baseline normalisation · a raw-signal (ECG/EDA) feature pipeline on the original WESAD files · temporal smoothing of predictions · gradient-boosting comparison and threshold tuning · validation on driving datasets (e.g. the PhysioNet *Stress Recognition in Automobile Drivers* database).

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  train-test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Cache WESAD HRV dataset
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: wesad-hrv-${{ hashFiles('src/preprocessing.py') }}
+
+      - name: Download dataset
+        run: python -m src.download_data
+
+      - name: Train and evaluate model
+        run: python -m src.train
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Build Docker image
+        run: docker build -t driver-stress-monitoring:ci .
+
+      - name: Smoke-test API container
+        run: |
+          docker run -d --name api -p 8000:8000 driver-stress-monitoring:ci
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && break; sleep 1; done
+          curl -sf localhost:8000/model-info \
+            | python -c 'import sys,json; print(json.dumps({"features": json.load(sys.stdin)["example_input"]}))' > example.json
+          curl -sf -X POST localhost:8000/predict -H 'content-type: application/json' -d @example.json
+          docker rm -f api
